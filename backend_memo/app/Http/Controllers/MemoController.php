@@ -10,46 +10,63 @@ class MemoController extends Controller
 {
     public function index()
     {
-        $memos = DB::table('memo')->get();
-        return MemoResource::collection($memos);
+        try {
+            $memos = DB::table('memo')->get();
+            return response()->json(['success' => true, 'data' => $memos]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function store(Request $request) 
     {
-        $request->validate([
-            'title',
-            'description'
-        ]);
+        try {
+            $request->validate([
+                'title' => 'required',
+                'description' => 'required'
+            ]);
 
-        DB::table('memo')->insert([
-            'title' => $request->title,
-            'description' => $request->description,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            DB::table('memo')->insert([
+                'title' => $request->title,
+                'description' => $request->description,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
 
-        return response()->json('Data Berhasil Di Buat');
+            return response()->json(['success' => true, 'message' => 'Data Berhasil Dibuat']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function destroy($id)
     {
-        $memo = DB::table('memo')->where('id', $id);
+        try {
+            $memo = DB::table('memo')->where('id', $id);
 
-        if ($memo->exists()) {
-            $memo->delete();
-            return response()->json('Data Berhasil Dihapus');
+            if ($memo->exists()) {
+                $memo->delete();
+                return response()->json(['success' => true, 'message' => 'Data Berhasil Dihapus']);
+            }
+            return response()->json(['success' => false, 'message' => 'Data Tidak Ditemukan'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-
-        return response()->json('Data Tidak Ditemukan', 404);
     }
 
     public function toggleArsip($id)
     {
-        $memo = DB::table('memo')->where('id', $id)->first();
+        try {
+            $memo = DB::table('memo')->where('id', $id)->first();
 
-        if ($memo) {
-            $arsipStatus = !$memo->arsip;
-            DB::table('memo')->where('id', $id)->update(['arsip' => $arsipStatus]);
+            if ($memo) {
+                $arsipStatus = !$memo->arsip;
+                DB::table('memo')->where('id', $id)->update(['arsip' => $arsipStatus]);
+                return response()->json(['success' => true, 'message' => 'Status arsip berhasil diubah', 'arsip' => $arsipStatus]);
+            }
+            return response()->json(['success' => false, 'message' => 'Data Tidak Ditemukan'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
