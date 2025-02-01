@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MemoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/memo-data', [MemoController::class, 'index']);
+Route::post('/create-memo', [MemoController::class, 'store']);
+Route::delete('/delete-memo-{id}', [MemoController::class, 'destroy']);
+Route::post('/togglearsip-memo-{id}', [MemoController::class, 'toggleArsip']);

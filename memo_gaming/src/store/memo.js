@@ -1,26 +1,64 @@
+import axios from "axios";
+
 export default {
-    namespaced: true, // Mengaktifkan namespace untuk module ini
-    state: {
-      titleMemo: '', // State untuk count
-      descMemo: '', // State untuk count
+  namespaced: true,
+  state: {
+    memoData: [],
+  },
+  getters: {
+    getMemoData: (state) => state.memoData
+  },
+  mutations: {
+    setMemoData(state, data) {
+      state.memoData = data;
     },
-    getters: {
-      getCount: (state) => state.count, // Getter untuk mendapatkan nilai count
+  },
+  actions: {
+    async fetchMemoData({ commit }) {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/memo-data');
+        console.log('Data fetched:', response.data);
+        commit('setMemoData', response.data);
+
+      } catch (error) {
+        console.error('Error fetching memo data:', error);
+      }
     },
-    mutations: {
-      increment(state) {
-        state.count++; // Menambah nilai count
-      },
-      decrement(state) {
-        state.count--; // Mengurangi nilai count
-      },
-    },
-    actions: {
-      asyncIncrement({ commit }) {
-        setTimeout(() => {
-          commit('increment'); // Memanggil mutation increment
-        }, 1000);
-      },
-    },
-  };
   
+    async postMemoData({ dispatch }, memo) {
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/api/create-memo', memo);
+        console.log('Memo successfully created:', response.data);
+  
+        await dispatch('fetchMemoData');
+        
+      } catch (error) {
+        console.error('Error posting memo data:', error);
+      }
+    },
+
+    async deleteMemoData({ dispatch }, id) {
+      console.log(id)
+      try {
+        const response = await axios.delete(`http://127.0.0.1:8000/api/delete-memo-${id}`);
+        console.log('Memo successfully deleted:', response.data);
+  
+        await dispatch('fetchMemoData');
+        
+      } catch (error) {
+        console.error('Error memo data:', error);
+      }
+    },
+
+    async toggleArsipMemo({ dispatch }, id) {
+      console.log(id)
+      try {
+        const response = await axios.post(`http://127.0.0.1:8000/api/togglearsip-memo-${id}`);
+        await dispatch('fetchMemoData');
+        
+      } catch (error) {
+        console.error('Error memo data:', error);
+      }
+    },
+  }  
+};
